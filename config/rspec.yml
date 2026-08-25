@@ -1,0 +1,5 @@
+---
+inherit_from: default.yml
+
+RSpec:
+  Enabled: true
