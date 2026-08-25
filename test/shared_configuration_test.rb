@@ -43,6 +43,18 @@ class SharedConfigurationTest < Minitest::Test
     end
   end
 
+  # Rules whose advice we disagree with. Listing them means switching one back on has to be a
+  # deliberate edit rather than a side effect of a plugin update.
+  RULES_WE_TURN_OFF = %w[Obsession/Rails/ValidationMethodName].freeze
+
+  def test_the_shared_rules_switch_off_the_rules_we_disagree_with
+    settings = settings_for(RULES_WE_TURN_OFF)
+
+    RULES_WE_TURN_OFF.each do |rule|
+      refute settings.fetch(rule).fetch("Enabled"), "#{rule} is not switched off"
+    end
+  end
+
   # rubocop-obsession quietly loads rubocop-rspec whenever it can, which would switch on 115
   # RSpec rules in projects that use Minitest. Which rules apply must not depend on that.
   def test_rspec_rules_stay_off_until_a_project_asks_for_them
