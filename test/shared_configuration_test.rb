@@ -58,8 +58,13 @@ class SharedConfigurationTest < Minitest::Test
   end
 
   private
+    # A runner without a UTF-8 locale hands back output tagged US-ASCII, which breaks on the
+    # accented characters in RuboCop's cop descriptions.
     def run_rubocop(configuration, rules = nil)
-      Open3.capture2e("bundle", "exec", "rubocop", "--show-cops", *rules, "-c", configuration)
+      output, status = Open3.capture2e("bundle", "exec", "rubocop", "--show-cops", *rules,
+                                       "-c", configuration)
+
+      [ output.force_encoding(Encoding::UTF_8), status ]
     end
 
     def departments_offered_by(configuration)
