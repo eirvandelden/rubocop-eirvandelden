@@ -75,7 +75,7 @@ Both configs already include everything in `config/default.yml`.
 That needs the gem installed for the global Ruby, not just bundled in a project:
 
 ```bash
-gem install --local rubocop-eirvandelden
+rake install
 ```
 
 ## Changing a rule

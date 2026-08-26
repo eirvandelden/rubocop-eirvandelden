@@ -13,11 +13,9 @@ plugins:
 
 AllCops:
   NewCops: enable
-  SuggestExtensions: true
 
   Exclude:
     - '**/app/assets/**/*'
-    - '**/db/**/*schema.rb'
     - '**/db/schema.rb'
     - '**/log/**/*'
     - '**/node_modules/**/*'
@@ -51,11 +49,15 @@ Obsession/Rails/FullyDefinedJsonField:
 Obsession/Rails/ValidationMethodName:
   Enabled: false
 
+Layout/LineLength:
+  Enabled: true
+  Max: 120
+
 Metrics/BlockLength:
-  Exclude:
-    - spec/**/*_spec.rb
+  Enabled: true
 
 Style/FrozenStringLiteralComment:
+  Enabled: true
   EnforcedStyle: never
 
 Minitest/UnreachableAssertion:
@@ -89,9 +91,11 @@ Performance/UnfreezeString:
   Enabled: true
 
 Rails/AssertNot:
+  Enabled: true
   Include:
     - '**/test/**/*'
 Rails/RefuteMethods:
+  Enabled: true
   Include:
     - '**/test/**/*'
 Rails/IndexBy:

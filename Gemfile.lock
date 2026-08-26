@@ -6,6 +6,8 @@ PATH
       rubocop-minitest
       rubocop-obsession
       rubocop-packaging
+      rubocop-performance
+      rubocop-rails
       rubocop-rails-omakase
       rubocop-rspec
       rubocop-yard

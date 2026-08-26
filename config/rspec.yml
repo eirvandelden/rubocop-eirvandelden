@@ -3,3 +3,7 @@ inherit_from: default.yml
 
 RSpec:
   Enabled: true
+
+Metrics/BlockLength:
+  Exclude:
+    - spec/**/*_spec.rb

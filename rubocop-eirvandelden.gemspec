@@ -9,7 +9,7 @@ Gem::Specification.new do |spec|
                        "changes in one place instead of in every repository."
   spec.license       = "Nonstandard"
 
-  spec.required_ruby_version = ">= 3.2.0"
+  spec.required_ruby_version = ">= 4.0"
 
   spec.files = Dir["config/**/*.yml", "LICENSE.md", "README.md", "CHANGELOG.md"]
 
@@ -18,6 +18,8 @@ Gem::Specification.new do |spec|
   spec.add_dependency "rubocop-minitest"
   spec.add_dependency "rubocop-obsession"
   spec.add_dependency "rubocop-packaging"
+  spec.add_dependency "rubocop-performance"
+  spec.add_dependency "rubocop-rails"
   spec.add_dependency "rubocop-rspec"
   spec.add_dependency "rubocop-yard"
 end

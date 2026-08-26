@@ -16,7 +16,8 @@ class SharedConfigurationTest < Minitest::Test
     Performance/FlatMap Performance/MapCompact Performance/RedundantMerge Performance/RegexpMatch
     Performance/ReverseEach Performance/SelectMap Performance/StartWith
     Performance/StringReplacement Performance/UnfreezeString
-    Rails/IndexBy Rails/IndexWith
+    Rails/AssertNot Rails/IndexBy Rails/IndexWith Rails/RefuteMethods
+    Layout/LineLength Metrics/BlockLength Style/FrozenStringLiteralComment
     YARD/CollectionStyle YARD/CollectionType YARD/MeaninglessTag YARD/MismatchName
     YARD/TagTypeSyntax YARD/TagTypePosition
   ].freeze
@@ -37,10 +38,9 @@ class SharedConfigurationTest < Minitest::Test
 
   def test_the_shared_rules_switch_on_every_rule_we_chose_over_omakase
     settings = settings_for(RULES_WE_TURN_ON)
+    switched_off = RULES_WE_TURN_ON.reject { |rule| settings.fetch(rule).fetch("Enabled") == true }
 
-    RULES_WE_TURN_ON.each do |rule|
-      assert_includes [ true, "pending" ], settings.dig(rule, "Enabled"), "#{rule} is not switched on"
-    end
+    assert_empty switched_off
   end
 
   # Rules whose advice we disagree with. Listing them means switching one back on has to be a
@@ -49,20 +49,18 @@ class SharedConfigurationTest < Minitest::Test
 
   def test_the_shared_rules_switch_off_the_rules_we_disagree_with
     settings = settings_for(RULES_WE_TURN_OFF)
+    still_switched_on = RULES_WE_TURN_OFF.select { |rule| settings.fetch(rule).fetch("Enabled") }
 
-    RULES_WE_TURN_OFF.each do |rule|
-      refute settings.fetch(rule).fetch("Enabled"), "#{rule} is not switched off"
-    end
+    assert_empty still_switched_on
   end
 
   # rubocop-obsession quietly loads rubocop-rspec whenever it can, which would switch on 115
   # RSpec rules in projects that use Minitest. Which rules apply must not depend on that.
   def test_rspec_rules_stay_off_until_a_project_asks_for_them
-    refute rspec_rules_switched_on_by("config/default.yml")
-  end
+    off_by_default = rspec_rules_switched_on_by("config/default.yml")
+    on_when_asked = rspec_rules_switched_on_by("config/rspec.yml")
 
-  def test_projects_using_rspec_switch_its_rules_on
-    assert rspec_rules_switched_on_by("config/rspec.yml")
+    assert_equal [ false, true ], [ off_by_default, on_when_asked ]
   end
 
   def test_projects_using_capybara_can_add_its_cops
