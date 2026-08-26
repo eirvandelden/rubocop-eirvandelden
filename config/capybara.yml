@@ -1,5 +1,8 @@
 ---
-inherit_from: default.yml
-
+# Layer this on top of default.yml in a project that drives a browser. The project supplies
+# rubocop-capybara itself, since most projects here do not need it.
 plugins:
   - rubocop-capybara
+
+Capybara:
+  Enabled: true

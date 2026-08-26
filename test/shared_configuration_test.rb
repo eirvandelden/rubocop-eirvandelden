@@ -16,7 +16,6 @@ class SharedConfigurationTest < Minitest::Test
     Performance/FlatMap Performance/MapCompact Performance/RedundantMerge Performance/RegexpMatch
     Performance/ReverseEach Performance/SelectMap Performance/StartWith
     Performance/StringReplacement Performance/UnfreezeString
-    Rails/AssertNot Rails/IndexBy Rails/IndexWith Rails/RefuteMethods
     Layout/LineLength Metrics/BlockLength Style/FrozenStringLiteralComment
     YARD/CollectionStyle YARD/CollectionType YARD/MeaninglessTag YARD/MismatchName
     YARD/TagTypeSyntax YARD/TagTypePosition
@@ -39,6 +38,36 @@ class SharedConfigurationTest < Minitest::Test
   def test_the_shared_rules_switch_on_every_rule_we_chose_over_omakase
     settings = settings_for(RULES_WE_TURN_ON)
     switched_off = RULES_WE_TURN_ON.reject { |rule| settings.fetch(rule).fetch("Enabled") == true }
+
+    assert_empty switched_off
+  end
+
+  # Rails advice suggests ActiveSupport methods. A plain Ruby project has none, so these must
+  # stay out of the rules every project shares or autocorrect writes a method that cannot run.
+  RAILS_RULES = %w[
+    Rails/AssertNot Rails/IndexBy Rails/IndexWith Rails/RefuteMethods
+    Obsession/Rails/MigrationBelongsTo Obsession/Rails/NoCallbackConditions
+    Obsession/Rails/ServiceName Obsession/Rails/ShortValidate
+  ].freeze
+
+  def test_rails_advice_stays_out_of_the_rules_every_project_shares
+    settings = settings_for(RAILS_RULES)
+    still_on = RAILS_RULES.select { |rule| settings.fetch(rule).fetch("Enabled") }
+
+    assert_empty still_on
+  end
+
+  def test_rails_projects_get_the_rails_advice
+    settings = settings_for(RAILS_RULES, "config/rails.yml")
+    switched_off = RAILS_RULES.reject { |rule| settings.fetch(rule).fetch("Enabled") == true }
+
+    assert_empty switched_off
+  end
+
+  def test_a_rails_project_using_capybara_keeps_both_sets_of_advice
+    settings = settings_for(RAILS_RULES + [ "Capybara/CurrentPathExpectation" ],
+                            "test/fixtures/rails_project_using_capybara.yml")
+    switched_off = settings.reject { |_rule, setting| setting.fetch("Enabled") == true }.keys
 
     assert_empty switched_off
   end
