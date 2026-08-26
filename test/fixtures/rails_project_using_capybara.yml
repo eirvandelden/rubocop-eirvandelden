@@ -1,0 +1,7 @@
+---
+# A Rails project with system tests stacks three layers. Listing capybara last must not undo
+# the Rails layer.
+inherit_from:
+  - ../../config/default.yml
+  - ../../config/rails.yml
+  - ../../config/capybara.yml

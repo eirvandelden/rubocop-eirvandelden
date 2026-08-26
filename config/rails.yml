@@ -1,0 +1,43 @@
+---
+# Layer this on top of default.yml in a Rails project:
+#
+#   inherit_gem:
+#     rubocop-eirvandelden:
+#       - config/default.yml
+#       - config/rails.yml
+#
+# Everything here needs ActiveSupport or ActiveRecord, which is why it is not shared with plain
+# Ruby projects.
+plugins:
+  - rubocop-obsession
+  - rubocop-rails
+
+Obsession/Rails:
+  Enabled: true
+
+Rails/AssertNot:
+  Enabled: true
+  Include:
+    - '**/test/**/*'
+Rails/RefuteMethods:
+  Enabled: true
+  Include:
+    - '**/test/**/*'
+Rails/IndexBy:
+  Enabled: true
+Rails/IndexWith:
+  Enabled: true
+
+# belongs_to is a literal alias of references, so rewriting migrations that have already run
+# changes nothing. Rails regenerates some of them anyway. Both cops still guide new code.
+Obsession/Rails/MigrationBelongsTo:
+  Exclude:
+    - '**/db/migrate/**/*'
+Obsession/Rails/FullyDefinedJsonField:
+  Exclude:
+    - '**/db/migrate/**/*'
+
+# "validate :account_must_be_external" reads as a sentence. The prefix this wants would make it
+# "validate :validate_account_must_be_external", which stutters and says no more.
+Obsession/Rails/ValidationMethodName:
+  Enabled: false

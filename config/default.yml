@@ -35,20 +35,6 @@ RSpec:
 Minitest/MultipleAssertions:
   Max: 8
 
-# belongs_to is a literal alias of references, so rewriting migrations that have already run
-# changes nothing. Rails regenerates some of them anyway. Both cops still guide new code.
-Obsession/Rails/MigrationBelongsTo:
-  Exclude:
-    - '**/db/migrate/**/*'
-Obsession/Rails/FullyDefinedJsonField:
-  Exclude:
-    - '**/db/migrate/**/*'
-
-# "validate :account_must_be_external" reads as a sentence. The prefix this wants would make it
-# "validate :validate_account_must_be_external", which stutters and says no more.
-Obsession/Rails/ValidationMethodName:
-  Enabled: false
-
 Layout/LineLength:
   Enabled: true
   Max: 120
@@ -96,18 +82,12 @@ Performance/StringReplacement:
 Performance/UnfreezeString:
   Enabled: true
 
-Rails/AssertNot:
-  Enabled: true
-  Include:
-    - '**/test/**/*'
-Rails/RefuteMethods:
-  Enabled: true
-  Include:
-    - '**/test/**/*'
-Rails/IndexBy:
-  Enabled: true
-Rails/IndexWith:
-  Enabled: true
+# Rails advice lives in config/rails.yml. Every one of these cops suggests an ActiveSupport
+# method, so in a plain Ruby project they autocorrect into a method that does not exist.
+Rails:
+  Enabled: false
+Obsession/Rails:
+  Enabled: false
 
 YARD/CollectionStyle:
   Enabled: true
