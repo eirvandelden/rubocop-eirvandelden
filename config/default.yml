@@ -1,0 +1,123 @@
+---
+inherit_gem:
+  rubocop-rails-omakase: rubocop.yml
+
+plugins:
+  - rubocop-minitest
+  - rubocop-obsession
+  - rubocop-packaging
+  - rubocop-performance
+  - rubocop-rails
+  - rubocop-rspec
+  - rubocop-yard
+
+AllCops:
+  NewCops: enable
+
+  Exclude:
+    - '**/app/assets/**/*'
+    - '**/db/schema.rb'
+    - '**/log/**/*'
+    - '**/node_modules/**/*'
+    - '**/public/**/*'
+    - '**/storage/**/*'
+    - '**/templates/**/*'
+    - '**/tmp/**/*'
+    - '**/vendor/**/*'
+    - 'bin/**/*'
+
+# rubocop-obsession loads rubocop-rspec whenever it can. Naming the department here keeps
+# these rules off in the Minitest projects that would otherwise inherit all 115 of them.
+RSpec:
+  Enabled: false
+
+# A test that walks a whole user journey earns several assertions; one with a dozen is a smell.
+Minitest/MultipleAssertions:
+  Max: 8
+
+# belongs_to is a literal alias of references, so rewriting migrations that have already run
+# changes nothing. Rails regenerates some of them anyway. Both cops still guide new code.
+Obsession/Rails/MigrationBelongsTo:
+  Exclude:
+    - '**/db/migrate/**/*'
+Obsession/Rails/FullyDefinedJsonField:
+  Exclude:
+    - '**/db/migrate/**/*'
+
+# "validate :account_must_be_external" reads as a sentence. The prefix this wants would make it
+# "validate :validate_account_must_be_external", which stutters and says no more.
+Obsession/Rails/ValidationMethodName:
+  Enabled: false
+
+Layout/LineLength:
+  Enabled: true
+  Max: 120
+
+# Routes and environment files are one long block by design, and a test block's size is
+# already governed by how many assertions it makes.
+Metrics/BlockLength:
+  Enabled: true
+  Exclude:
+    - '**/config/environments/*.rb'
+    - '**/config/routes.rb'
+    - '**/test/**/*'
+
+Style/FrozenStringLiteralComment:
+  Enabled: true
+  EnforcedStyle: never
+
+Minitest/UnreachableAssertion:
+  Enabled: true
+
+Performance/BindCall:
+  Enabled: true
+Performance/DeletePrefix:
+  Enabled: true
+Performance/DeleteSuffix:
+  Enabled: true
+Performance/EndWith:
+  Enabled: true
+Performance/FlatMap:
+  Enabled: true
+Performance/MapCompact:
+  Enabled: true
+Performance/RedundantMerge:
+  Enabled: true
+Performance/RegexpMatch:
+  Enabled: true
+Performance/ReverseEach:
+  Enabled: true
+Performance/SelectMap:
+  Enabled: true
+Performance/StartWith:
+  Enabled: true
+Performance/StringReplacement:
+  Enabled: true
+Performance/UnfreezeString:
+  Enabled: true
+
+Rails/AssertNot:
+  Enabled: true
+  Include:
+    - '**/test/**/*'
+Rails/RefuteMethods:
+  Enabled: true
+  Include:
+    - '**/test/**/*'
+Rails/IndexBy:
+  Enabled: true
+Rails/IndexWith:
+  Enabled: true
+
+YARD/CollectionStyle:
+  Enabled: true
+YARD/CollectionType:
+  Enabled: true
+YARD/MeaninglessTag:
+  Enabled: true
+YARD/MismatchName:
+  Enabled: true
+YARD/TagTypeSyntax:
+  Enabled: true
+YARD/TagTypePosition:
+  Enabled: true

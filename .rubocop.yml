@@ -1,0 +1,9 @@
+---
+inherit_from: config/default.yml
+
+# assert_not comes from ActiveSupport. This gem ships configuration, not a Rails app, so its
+# own tests use plain Minitest and these two rules would ask for a method that does not exist.
+Rails/AssertNot:
+  Enabled: false
+Rails/RefuteMethods:
+  Enabled: false
