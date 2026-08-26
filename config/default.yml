@@ -53,8 +53,14 @@ Layout/LineLength:
   Enabled: true
   Max: 120
 
+# Routes and environment files are one long block by design, and a test block's size is
+# already governed by how many assertions it makes.
 Metrics/BlockLength:
   Enabled: true
+  Exclude:
+    - '**/config/environments/*.rb'
+    - '**/config/routes.rb'
+    - '**/test/**/*'
 
 Style/FrozenStringLiteralComment:
   Enabled: true
