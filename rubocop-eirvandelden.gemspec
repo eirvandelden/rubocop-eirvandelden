@@ -9,7 +9,7 @@ Gem::Specification.new do |spec|
                        "changes in one place instead of in every repository."
   spec.license       = "Nonstandard"
 
-  spec.required_ruby_version = ">= 4.0"
+  spec.required_ruby_version = ">= 3.4"
 
   spec.files = Dir["config/**/*.yml", "LICENSE.md", "README.md", "CHANGELOG.md"]
 

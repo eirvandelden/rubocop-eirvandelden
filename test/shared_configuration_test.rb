@@ -92,6 +92,15 @@ class SharedConfigurationTest < Minitest::Test
     assert_equal [ false, true ], [ off_by_default, on_when_asked ]
   end
 
+  # The gem is configuration files, so the Ruby it asks for is a choice rather than a
+  # constraint. Ask for too new a one and projects that could happily use these rules cannot
+  # install them at all.
+  def test_the_gem_asks_for_a_ruby_its_projects_actually_run
+    specification = Gem::Specification.load("rubocop-eirvandelden.gemspec")
+
+    assert_equal Gem::Requirement.new(">= 3.4"), specification.required_ruby_version
+  end
+
   def test_projects_using_capybara_can_add_its_cops
     assert_includes departments_offered_by("config/capybara.yml"), "Capybara"
   end
