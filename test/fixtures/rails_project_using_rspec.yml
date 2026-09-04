@@ -1,0 +1,7 @@
+---
+# A Rails project whose tests are specs stacks three layers. The RSpec layer must add to what
+# the shared layer excludes rather than replace it.
+inherit_from:
+  - ../../config/default.yml
+  - ../../config/rails.yml
+  - ../../config/rspec.yml

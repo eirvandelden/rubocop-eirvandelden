@@ -6,6 +6,11 @@ plugins:
 RSpec:
   Enabled: true
 
+# Without inherit_mode this list would replace what default.yml excludes, quietly bringing the
+# cop back for routes, environments and tests.
 Metrics/BlockLength:
+  inherit_mode:
+    merge:
+      - Exclude
   Exclude:
     - spec/**/*_spec.rb
