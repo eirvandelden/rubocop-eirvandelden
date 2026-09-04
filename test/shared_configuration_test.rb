@@ -101,6 +101,18 @@ class SharedConfigurationTest < Minitest::Test
     assert_equal Gem::Requirement.new(">= 3.4"), specification.required_ruby_version
   end
 
+  # A layer that sets Exclude replaces the list it inherits unless it says otherwise, so an
+  # extra layer can quietly re-enable a cop for routes, environments and tests.
+  def test_stacking_the_rspec_layer_keeps_what_the_shared_layer_excludes
+    settings = settings_for([ "Metrics/BlockLength" ], "test/fixtures/rails_project_using_rspec.yml")
+    excluded = settings.fetch("Metrics/BlockLength").fetch("Exclude").map(&:to_s)
+    missing = [ "config/environments", "spec" ].reject do |path|
+      excluded.any? { |exclusion| exclusion.include?(path) }
+    end
+
+    assert_empty missing
+  end
+
   def test_projects_using_capybara_can_add_its_cops
     assert_includes departments_offered_by("config/capybara.yml"), "Capybara"
   end
