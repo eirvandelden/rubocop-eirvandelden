@@ -2,7 +2,7 @@
 
 ## What this is
 
-A RuboCop configuration gem: the shared lint rules for Etienne's personal Ruby projects, packaged so a project pulls them in with `inherit_gem` instead of each repo carrying its own copy of the rules. It builds on `rubocop-rails-omakase` and bundles the cop gems it needs (rubocop-rails, rubocop-minitest, rubocop-rspec, rubocop-obsession, rubocop-packaging, rubocop-performance, rubocop-yard) so a consuming project adds nothing extra to its own Gemfile.
+A RuboCop configuration gem: the shared lint rules for Etienne's personal Ruby projects, packaged so a project pulls them in with `inherit_gem` instead of each repo carrying its own copy of the rules. It builds on `rubocop-rails-omakase` and bundles the cop gems it needs (rubocop-rails, rubocop-rbs_inline, rubocop-minitest, rubocop-rspec, rubocop-obsession, rubocop-packaging, rubocop-performance, rubocop-yard) so a consuming project adds nothing extra to its own Gemfile.
 
 ## Domain
 
