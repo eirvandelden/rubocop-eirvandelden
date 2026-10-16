@@ -1,0 +1,8 @@
+---
+# YARD is bundled but off in the shared layer. A project that documents with YARD switches the
+# department back on, and gets the cops with rubocop-yard's own settings.
+inherit_from:
+  - ../../config/default.yml
+
+YARD:
+  Enabled: true

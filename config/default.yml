@@ -8,6 +8,7 @@ plugins:
   - rubocop-packaging
   - rubocop-performance
   - rubocop-rails
+  - rubocop-rbs_inline
   - rubocop-rspec
   - rubocop-yard
 
@@ -47,6 +48,10 @@ Metrics/BlockLength:
     - '**/config/environments/*.rb'
     - '**/config/routes.rb'
     - '**/test/**/*'
+
+# `#:` return annotations have no space after the hash by design.
+Layout/LeadingCommentSpace:
+  AllowRBSInlineAnnotation: true
 
 Style/FrozenStringLiteralComment:
   Enabled: true
@@ -89,15 +94,38 @@ Rails:
 Obsession/Rails:
   Enabled: false
 
-YARD/CollectionStyle:
+# Inline RBS annotations are checked only in files that carry `# rbs_inline: enabled`. Naming
+# the mode keeps a plugin release from switching every file on. Omakase switches the whole Style
+# department off, so each checking cop is named. None of them demands an annotation.
+Style/RbsInline:
+  Mode: opt_in
+Style/RbsInline/EmbeddedRbsSpacing:
   Enabled: true
-YARD/CollectionType:
+Style/RbsInline/InvalidComment:
   Enabled: true
-YARD/MeaninglessTag:
+Style/RbsInline/InvalidTypes:
   Enabled: true
-YARD/MismatchName:
+Style/RbsInline/KeywordSeparator:
   Enabled: true
-YARD/TagTypeSyntax:
+Style/RbsInline/MethodCommentSpacing:
   Enabled: true
-YARD/TagTypePosition:
+Style/RbsInline/ParametersSeparator:
   Enabled: true
+# Opt-in mode never reports this cop. Naming it records that a file is not required to opt in.
+Style/RbsInline/RequireRbsInlineComment:
+  Enabled: true
+  AllowMissingComment: true
+Style/RbsInline/RedundantAnnotationWithSkip:
+  Enabled: true
+Style/RbsInline/RedundantTypeAnnotation:
+  Enabled: true
+Style/RbsInline/UnmatchedAnnotations:
+  Enabled: true
+Style/RbsInline/VariableCommentSpacing:
+  Enabled: true
+
+# YARD is bundled but off. A project that documents with YARD adds `YARD: Enabled: true` to its
+# own .rubocop.yml. The department switch only holds while no YARD cop is named here, because
+# RuboCop keeps a cop on when the same file both disables its department and enables the cop.
+YARD:
+  Enabled: false
