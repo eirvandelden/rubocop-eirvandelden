@@ -32,12 +32,9 @@ inherit_gem:
 project — Minitest, Obsession, Packaging, Performance, inline RBS and YARD. They come with the
 gem, so nothing extra goes in a project's Gemfile.
 
-Inline RBS annotations (`#:` and `# @rbs`) are checked by `rubocop-rbs_inline`, only in files that
-start with `# rbs_inline: enabled`. A file without that comment is never flagged, and no file is
-required to carry annotations.
+Inline RBS annotations (`#:` and `# @rbs`) are checked by `rubocop-rbs_inline`, only in files that start with `# rbs_inline: enabled`. A file without that comment is never flagged, and no file is required to carry annotations.
 
-YARD is bundled but off. A project that documents with YARD switches it back on in its own
-`.rubocop.yml`:
+YARD is bundled but off. A project that documents with YARD switches it back on in its own `.rubocop.yml`:
 
 ```yaml
 YARD:
