@@ -29,8 +29,17 @@ inherit_gem:
 ## What you get
 
 `config/default.yml` builds on `rubocop-rails-omakase` and adds the plugins that suit any Ruby
-project — Minitest, Obsession, Packaging, Performance and YARD. They come with the gem, so
-nothing extra goes in a project's Gemfile.
+project — Minitest, Obsession, Packaging, Performance, inline RBS and YARD. They come with the
+gem, so nothing extra goes in a project's Gemfile.
+
+Inline RBS annotations (`#:` and `# @rbs`) are checked by `rubocop-rbs_inline`, only in files that start with `# rbs_inline: enabled`. A file without that comment is never flagged, and no file is required to carry annotations.
+
+YARD is bundled but off. A project that documents with YARD switches it back on in its own `.rubocop.yml`:
+
+```yaml
+YARD:
+  Enabled: true
+```
 
 Omakase switches most Performance cops off, and leaves `Layout/LineLength` off entirely. Every
 rule turned back on is listed explicitly, and a test asserts each one is still active.

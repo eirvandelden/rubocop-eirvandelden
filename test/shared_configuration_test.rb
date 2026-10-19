@@ -17,9 +17,105 @@ class SharedConfigurationTest < Minitest::Test
     Performance/ReverseEach Performance/SelectMap Performance/StartWith
     Performance/StringReplacement Performance/UnfreezeString
     Layout/LineLength Metrics/BlockLength Style/FrozenStringLiteralComment
-    YARD/CollectionStyle YARD/CollectionType YARD/MeaninglessTag YARD/MismatchName
-    YARD/TagTypeSyntax YARD/TagTypePosition
   ].freeze
+
+  MALFORMED_OPTED_IN = <<~RUBY.freeze
+    # rbs_inline: enabled
+
+    # @rbs name: Array[String
+    def greet(name)
+      name
+    end
+  RUBY
+
+  def test_a_malformed_inline_rbs_annotation_fails_lint_in_a_file_that_opts_in
+    output, status = lint(MALFORMED_OPTED_IN)
+
+    refute_predicate status, :success?
+    assert_includes output, "Style/RbsInline/"
+  end
+
+  VALID_OPTED_IN = <<~RUBY.freeze
+    # rbs_inline: enabled
+
+    # @rbs name: String
+    def greet(name) #: String
+      name
+    end
+  RUBY
+
+  NOT_OPTED_IN = <<~RUBY.freeze
+    # @rbs name: Array[String
+    def greet(name) #: String
+      name
+    end
+  RUBY
+
+  WRONG_YARD_TAG_TYPE = <<~RUBY.freeze
+    # @param name [Array<String]
+    def greet(name)
+      name
+    end
+  RUBY
+
+  VALIDATING_RBS_RULES = %w[
+    EmbeddedRbsSpacing InvalidComment InvalidTypes KeywordSeparator MethodCommentSpacing
+    ParametersSeparator RedundantAnnotationWithSkip RedundantTypeAnnotation UnmatchedAnnotations
+    VariableCommentSpacing
+  ].map { |rule| "Style/RbsInline/#{rule}" }.freeze
+
+  def test_a_valid_inline_rbs_annotation_passes_lint_in_a_file_that_opts_in
+    output, status = lint(VALID_OPTED_IN)
+
+    assert_predicate status, :success?, output
+  end
+
+  def test_a_file_that_does_not_opt_in_passes_lint_however_it_is_annotated
+    output, status = lint(NOT_OPTED_IN)
+
+    assert_predicate status, :success?, output
+  end
+
+  def test_a_yard_comment_with_a_wrong_tag_type_passes_lint_under_the_shared_rules
+    output, status = lint(WRONG_YARD_TAG_TYPE)
+
+    assert_predicate status, :success?, output
+  end
+
+  def test_a_project_that_switches_yard_on_gets_the_yard_cops_back
+    output, status = lint(WRONG_YARD_TAG_TYPE, "test/fixtures/project_using_yard.yml")
+
+    refute_predicate status, :success?
+    assert_includes output, "YARD/TagTypeSyntax"
+  end
+
+  def test_the_shared_rules_switch_on_every_inline_rbs_rule
+    settings = settings_for(VALIDATING_RBS_RULES)
+    switched_off = VALIDATING_RBS_RULES.reject { |rule| settings.fetch(rule).fetch("Enabled") == true }
+
+    assert_empty switched_off
+  end
+
+  def test_the_shared_rules_never_demand_the_rbs_inline_magic_comment
+    setting = settings_for([ "Style/RbsInline/RequireRbsInlineComment" ])
+      .fetch("Style/RbsInline/RequireRbsInlineComment")
+
+    assert_equal [ true, true ], [ setting.fetch("Enabled"), setting.fetch("AllowMissingComment") ]
+  end
+
+  def test_the_shared_rules_accept_inline_rbs_annotations_without_a_space
+    setting = settings_for([ "Layout/LeadingCommentSpace" ]).fetch("Layout/LeadingCommentSpace")
+
+    assert setting.fetch("AllowRBSInlineAnnotation")
+  end
+
+  def test_yard_rules_stay_off_until_a_project_asks_for_them
+    off_by_default = settings_for([ "YARD/TagTypeSyntax" ]).fetch("YARD/TagTypeSyntax").fetch("Enabled")
+    on_when_asked = settings_for([ "YARD/TagTypeSyntax" ], "test/fixtures/project_using_yard.yml")
+      .fetch("YARD/TagTypeSyntax").fetch("Enabled")
+
+    assert_equal [ false, true ], [ off_by_default, on_when_asked ]
+  end
 
   def test_the_shared_rules_load_without_error
     _, status = run_rubocop("config/default.yml")
@@ -129,19 +225,11 @@ class SharedConfigurationTest < Minitest::Test
   end
 
   private
-    # A runner without a UTF-8 locale hands back output tagged US-ASCII, which breaks on the
-    # accented characters in RuboCop's cop descriptions.
-    def run_rubocop(configuration, rules = nil)
-      output, status = Open3.capture2e("bundle", "exec", "rubocop", "--show-cops", *rules,
-                                       "-c", configuration)
+    def lint(source, configuration = "config/default.yml")
+      output, status = Open3.capture2e("bundle", "exec", "rubocop", "--stdin", "lib/example.rb",
+                                       "-c", configuration, "--format", "simple", stdin_data: source)
 
       [ output.force_encoding(Encoding::UTF_8), status ]
-    end
-
-    def departments_offered_by(configuration)
-      output, _ = run_rubocop(configuration)
-
-      output.scan(/^([A-Z][A-Za-z]*)\/[A-Za-z]/).flatten.uniq
     end
 
     def settings_for(rules, configuration = "config/default.yml")
@@ -152,10 +240,25 @@ class SharedConfigurationTest < Minitest::Test
       YAML.safe_load(output, aliases: true)
     end
 
+    # A runner without a UTF-8 locale hands back output tagged US-ASCII, which breaks on the
+    # accented characters in RuboCop's cop descriptions.
+    def run_rubocop(configuration, rules = nil)
+      output, status = Open3.capture2e("bundle", "exec", "rubocop", "--show-cops", *rules,
+                                       "-c", configuration)
+
+      [ output.force_encoding(Encoding::UTF_8), status ]
+    end
+
     def complaints_in(output)
       complaints = output.lines.grep(/\A(Unrecognized cop|Did you mean\?|Error:)/)
 
       complaints.empty? ? output : complaints.join
+    end
+
+    def departments_offered_by(configuration)
+      output, _ = run_rubocop(configuration)
+
+      output.scan(/^([A-Z][A-Za-z]*)\/[A-Za-z]/).flatten.uniq
     end
 
     def rspec_rules_switched_on_by(configuration)
