@@ -232,6 +232,14 @@ class SharedConfigurationTest < Minitest::Test
       [ output.force_encoding(Encoding::UTF_8), status ]
     end
 
+    def settings_for(rules, configuration = "config/default.yml")
+      output, status = run_rubocop(configuration, rules.join(","))
+
+      assert_predicate status, :success?, complaints_in(output)
+
+      YAML.safe_load(output, aliases: true)
+    end
+
     # A runner without a UTF-8 locale hands back output tagged US-ASCII, which breaks on the
     # accented characters in RuboCop's cop descriptions.
     def run_rubocop(configuration, rules = nil)
@@ -241,24 +249,16 @@ class SharedConfigurationTest < Minitest::Test
       [ output.force_encoding(Encoding::UTF_8), status ]
     end
 
-    def departments_offered_by(configuration)
-      output, _ = run_rubocop(configuration)
-
-      output.scan(/^([A-Z][A-Za-z]*)\/[A-Za-z]/).flatten.uniq
-    end
-
-    def settings_for(rules, configuration = "config/default.yml")
-      output, status = run_rubocop(configuration, rules.join(","))
-
-      assert_predicate status, :success?, complaints_in(output)
-
-      YAML.safe_load(output, aliases: true)
-    end
-
     def complaints_in(output)
       complaints = output.lines.grep(/\A(Unrecognized cop|Did you mean\?|Error:)/)
 
       complaints.empty? ? output : complaints.join
+    end
+
+    def departments_offered_by(configuration)
+      output, _ = run_rubocop(configuration)
+
+      output.scan(/^([A-Z][A-Za-z]*)\/[A-Za-z]/).flatten.uniq
     end
 
     def rspec_rules_switched_on_by(configuration)
