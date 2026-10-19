@@ -64,12 +64,23 @@ class SharedConfigurationTest < Minitest::Test
     assert_empty switched_off
   end
 
+  # Not under Capybara/RSpec/, so it applies whichever test framework the project's system tests use.
+  FRAMEWORK_NEUTRAL_CAPYBARA_RULE = "Capybara/SpecificFinders".freeze
+
   def test_a_rails_project_using_capybara_keeps_both_sets_of_advice
-    settings = settings_for(RAILS_RULES + [ "Capybara/CurrentPathExpectation" ],
+    settings = settings_for(RAILS_RULES + [ FRAMEWORK_NEUTRAL_CAPYBARA_RULE ],
                             "test/fixtures/rails_project_using_capybara.yml")
     switched_off = settings.reject { |_rule, setting| setting.fetch("Enabled") == true }.keys
 
     assert_empty switched_off
+  end
+
+  def test_a_rule_rubocop_does_not_recognise_fails_with_rubocops_own_message
+    failure = assert_raises(Minitest::Assertion) do
+      settings_for([ "Capybara/NoSuchRule" ], "test/fixtures/rails_project_using_capybara.yml")
+    end
+
+    assert_includes failure.message, "Unrecognized cop: Capybara/NoSuchRule"
   end
 
   # Rules whose advice we disagree with. Listing them means switching one back on has to be a
@@ -134,9 +145,17 @@ class SharedConfigurationTest < Minitest::Test
     end
 
     def settings_for(rules, configuration = "config/default.yml")
-      output, _ = run_rubocop(configuration, rules.join(","))
+      output, status = run_rubocop(configuration, rules.join(","))
+
+      assert_predicate status, :success?, complaints_in(output)
 
       YAML.safe_load(output, aliases: true)
+    end
+
+    def complaints_in(output)
+      complaints = output.lines.grep(/\A(Unrecognized cop|Did you mean\?|Error:)/)
+
+      complaints.empty? ? output : complaints.join
     end
 
     def rspec_rules_switched_on_by(configuration)
