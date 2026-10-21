@@ -263,3 +263,13 @@ Domain skills applied: software-design, glossary, diagrams, ruby-style, dependen
 - The fallback demands signatures in a work repository without its own config, which conflicts with the decision that work files do not use inline RBS → fixed (Design decisions names the tension instead of claiming no conflict; the report raises it as a Decision needed line)
   - The plan keeps the fallback change, because `intent.md` asks for it and puts work projects out of scope.
 - The README's "Loose Ruby files" section wrongly says `~/.rubocop.yml` inherits the gem and should be corrected while the README is open → dismissed: orthogonal to this change; playbook rule 21 sends it to its own pull request, and the report proposes it as a follow-up
+
+## Coordinator decisions (2026-10-21)
+
+Etienne settled the plan report's `Decision needed` lines. They override the plan's Out of scope where they conflict.
+
+- The dotfiles repository's own Ruby is annotated in the dotfiles pull request, so the stricter fallback leaves it green — Etienne: "fix it, in this pr". Every non-test `.rb` file the fallback lints in dotfiles passes `rubocop` after the change.
+- The fallback keeps the demanding cops — work repositories carry their own `.rubocop.yml`, so the fallback does not reach them.
+- The coordinator drives the dotfiles half after the gem pull request is green: `worktree-create`, tests, review, and a draft pull request with the repository's template.
+- Folded into this delivery: the gem's README "Loose Ruby files" section is corrected (`~/.rubocop.yml` carries its own copy of the rules; it does not inherit this gem), and the `rails-architecture` and `plan` skills in dotfiles say `#:` method signatures instead of "`#:` or `# @rbs`".
+- The implement stage covers the gem repository only (steps 1–9, plus the README correction). The coordinator does steps 10–14 and the dotfiles additions above.
