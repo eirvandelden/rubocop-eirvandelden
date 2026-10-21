@@ -1,0 +1,5 @@
+---
+# A Rails project stacks the shared layer and the Rails layer, nothing else.
+inherit_from:
+  - ../../config/default.yml
+  - ../../config/rails.yml
