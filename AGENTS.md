@@ -12,7 +12,6 @@ The gem ships four config layers under `config/`: `default.yml` (always, the bas
 
 - `bundle install` — install dependencies.
 - `bundle exec rake test` (or plain `rake`, it's the default task) — run `test/shared_configuration_test.rb`.
-- `rake install` — install the gem for the global Ruby, so `~/.rubocop.yml` (which inherits this gem) can lint files outside any project.
 
 ## Gotchas
 
@@ -20,3 +19,4 @@ The gem ships four config layers under `config/`: `default.yml` (always, the bas
 - Never let `rails.yml` or `capybara.yml` `inherit_from` `default.yml`; that would double-apply `default.yml`'s department switch-offs when a consumer lists both, silently undoing the layer. A test guards this, but don't reintroduce it.
 - Rails-flavored cops (`Rails/AssertNot`, `Rails/IndexBy`, `Rails/IndexWith`, the `Obsession/Rails` cops) autocorrect into ActiveSupport methods that don't exist in a plain Ruby project — that's why they live in `rails.yml`, not `default.yml`.
 - A rule change here doesn't reach a consuming project until that project runs `bundle update rubocop-eirvandelden`.
+- `~/.rubocop.yml` (dotfiles `rubocop/.rubocop.yml`) does not inherit this gem; it carries its own copy of the rules for files outside any project. Change both when a rule changes.
