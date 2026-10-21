@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    rubocop-eirvandelden (0.1.0)
+    rubocop-eirvandelden (1.0.0)
       rubocop
       rubocop-minitest
       rubocop-obsession
@@ -9,7 +9,7 @@ PATH
       rubocop-performance
       rubocop-rails
       rubocop-rails-omakase
-      rubocop-rbs_inline
+      rubocop-rbs_inline (~> 2.0)
       rubocop-rspec
       rubocop-yard
 
@@ -162,7 +162,7 @@ CHECKSUMS
   rubocop (1.92.0) sha256=2af68041fb2e70bd9321d0479b49fad07f8008a3d0758c83347b4917128c56e0
   rubocop-ast (1.50.0) sha256=b9ca88300da0803ee222ad20cdb30494c0a784eed06fdc35d254b06d662788db
   rubocop-capybara (3.0.0) sha256=7a64655238acda7f8f3c87e37ac825a64c615a79c17c253f1a28270dc3768c4b
-  rubocop-eirvandelden (0.1.0)
+  rubocop-eirvandelden (1.0.0)
   rubocop-minitest (0.41.0) sha256=c15bfe00134a30c8a00ce670b07ecc80440455ba277b8682cf0d515c98ee7426
   rubocop-obsession (0.2.3) sha256=db35c9c2673d107c578e905c36e98f6d7c7e038e4d9afe27479e7e3dee06cc89
   rubocop-packaging (0.6.0) sha256=fb92bd0fb48e6f8cdb1648d2249b0cd51c2497dcc87340132d22f01edbf558a7
