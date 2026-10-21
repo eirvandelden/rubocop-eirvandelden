@@ -32,7 +32,7 @@ inherit_gem:
 project — Minitest, Obsession, Packaging, Performance, inline RBS and YARD. They come with the
 gem, so nothing extra goes in a project's Gemfile.
 
-Inline RBS annotations are checked by `rubocop-rbs_inline` in every file outside `test/` and `spec/`, with no magic comment. Public methods and `attr_*` need a `#:` signature, and `Data.define` and `Struct.new` attributes need a `#:` type. A file skips the checks only with `# rbs_inline: disabled`; a leftover `# rbs_inline: enabled` is flagged and autocorrect removes it. In a Rails project, `config/rails.yml` exempts migrations.
+Inline RBS annotations are checked by `rubocop-rbs_inline` in every file outside a `test/` or `spec/` folder, at any depth, with no magic comment. Public methods and `attr_*` need a `#:` signature, and `Data.define` and `Struct.new` attributes need a `#:` type. A file skips the checks only with `# rbs_inline: disabled`; a leftover `# rbs_inline: enabled` is flagged and autocorrect removes it. In a Rails project, `config/rails.yml` exempts migrations.
 
 YARD is bundled but off. A project that documents with YARD switches it back on in its own `.rubocop.yml`:
 

@@ -98,8 +98,12 @@ Obsession/Rails:
 # only with `# rbs_inline: disabled`. A leftover `# rbs_inline: enabled` is flagged, and autocorrect
 # removes it. Omakase switches the whole Style department off, so each cop is named. Lint demands
 # a `#:` signature on public methods and `attr_*`, and a `#:` type on every Data and Struct attribute.
+# The plugin skips only the root `test/` and `spec/`; the leading `**/` also skips nested ones.
 Style/RbsInline:
   Mode: opt_out
+  Exclude:
+    - '**/spec/**/*'
+    - '**/test/**/*'
 Style/RbsInline/DataClassCommentAlignment:
   Enabled: true
 Style/RbsInline/DataDefineWithBlock:

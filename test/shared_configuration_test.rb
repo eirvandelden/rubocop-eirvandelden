@@ -162,6 +162,14 @@ class SharedConfigurationTest < Minitest::Test
     end
   end
 
+  def test_an_unannotated_public_method_in_a_nested_test_or_spec_passes_lint
+    [ "engines/shop/test/greeter_test.rb", "engines/shop/spec/greeter_spec.rb" ].each do |path|
+      output, status = lint("def greet(name)\n  name\nend\n", path: path)
+
+      assert_predicate status, :success?, "#{path}: #{output}"
+    end
+  end
+
   MIGRATION = <<~RUBY.freeze
     class CreateGreetings < ActiveRecord::Migration[8.0]
       def change
