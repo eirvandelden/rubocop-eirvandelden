@@ -398,7 +398,7 @@ class SharedConfigurationTest < Minitest::Test
       corrected, = Open3.capture3("bundle", "exec", "rubocop", "--stdin", path, "-c", configuration,
                                   "--autocorrect-all", "--stderr", "--format", "quiet", stdin_data: source)
 
-      corrected.force_encoding(Encoding::UTF_8).split("====================\n", 2).last
+      corrected.force_encoding(Encoding::UTF_8)
     end
 
     def settings_for(rules, configuration = "config/default.yml")
