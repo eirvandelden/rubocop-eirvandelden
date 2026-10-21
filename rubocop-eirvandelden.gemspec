@@ -1,6 +1,6 @@
 Gem::Specification.new do |spec|
   spec.name          = "rubocop-eirvandelden"
-  spec.version       = "0.1.0"
+  spec.version       = "1.0.0"
   spec.authors       = [ "Etienne van Delden" ]
   spec.email         = [ "etienne@conductor.build" ]
   spec.homepage      = "https://github.com/eirvandelden/rubocop-eirvandelden"
@@ -20,7 +20,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency "rubocop-packaging"
   spec.add_dependency "rubocop-performance"
   spec.add_dependency "rubocop-rails"
-  spec.add_dependency "rubocop-rbs_inline"
+  spec.add_dependency "rubocop-rbs_inline", "~> 2.0"
   spec.add_dependency "rubocop-rspec"
   spec.add_dependency "rubocop-yard"
 end
