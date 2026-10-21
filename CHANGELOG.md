@@ -1,8 +1,9 @@
 # Changelog
 
-## Unreleased
+## 1.0.0
 
-- Check inline RBS annotations (`rubocop-rbs_inline`). The checks run only in files that start with `# rbs_inline: enabled`, and no file is required to opt in.
+- **Breaking:** every non-test file is now checked for inline RBS annotations (`rubocop-rbs_inline`, `Mode: opt_out`), with no magic comment. Public methods and `attr_*` need a `#:` signature, and `Data.define` and `Struct.new` attributes need a `#:` type. Projects fail lint until they annotate.
+- `# rbs_inline: disabled` is the only way out of the checks. A leftover `# rbs_inline: enabled` is flagged, and autocorrect removes it. Migrations are exempt in Rails projects (`config/rails.yml`), and `test/` and `spec/` stay unchecked.
 - `Layout/LeadingCommentSpace` accepts `#:` return annotations.
 - YARD cops are off by default. A project that documents with YARD adds `YARD: Enabled: true` to its `.rubocop.yml`.
 

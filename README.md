@@ -32,7 +32,7 @@ inherit_gem:
 project — Minitest, Obsession, Packaging, Performance, inline RBS and YARD. They come with the
 gem, so nothing extra goes in a project's Gemfile.
 
-Inline RBS annotations (`#:` and `# @rbs`) are checked by `rubocop-rbs_inline`, only in files that start with `# rbs_inline: enabled`. A file without that comment is never flagged, and no file is required to carry annotations.
+Inline RBS annotations are checked by `rubocop-rbs_inline` in every file outside `test/` and `spec/`, with no magic comment. Public methods and `attr_*` need a `#:` signature, and `Data.define` and `Struct.new` attributes need a `#:` type. A file skips the checks only with `# rbs_inline: disabled`; a leftover `# rbs_inline: enabled` is flagged and autocorrect removes it. In a Rails project, `config/rails.yml` exempts migrations.
 
 YARD is bundled but off. A project that documents with YARD switches it back on in its own `.rubocop.yml`:
 
@@ -91,12 +91,7 @@ project alongside the layer.
 
 ## Loose Ruby files
 
-`~/.rubocop.yml` inherits this gem too, which covers scripts that live outside any project.
-That needs the gem installed for the global Ruby, not just bundled in a project:
-
-```bash
-rake install
-```
+`~/.rubocop.yml` covers scripts that live outside any project. It does not inherit this gem; it carries its own copy of the rules, including the inline RBS settings. Change both when a rule changes.
 
 ## Changing a rule
 
