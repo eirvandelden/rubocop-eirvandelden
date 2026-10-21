@@ -45,3 +45,19 @@ Extra checks:
 Findings:
 
 None.
+
+## Round 3 — 2026-10-21T19:20Z — d806c33
+
+No `REVIEW.md` or `REVIEW.local.md` in the repository; the reviewer's default passes (Bugs, Security, Compliance, Design) ran over the commits since round 2 (`5089711`, `d806c33`). `bundle exec rake test` (38 runs, 134 assertions, 0 failures) and `bundle exec rubocop` (4 files, no offences) are green.
+
+Extra checks:
+
+- Bugs: the department `Exclude` in `config/default.yml` replaces the plugin's `test/**/*` and `spec/**/*` with a superset, so the root folders stay excluded. Probed with `--stdin`: under `config/default.yml` and `test/fixtures/rails_project.yml`, `engines/shop/test/…` and `engines/shop/spec/…` pass, `lib/greeter.rb` fails, and a nested `db/migrate` file passes only in the Rails stack. `rails.yml`'s cop-level migration `Exclude` does not drop the department `Exclude`.
+- Regression proof: the pre-fix `config/default.yml` (`d806c33^`) flags `engines/shop/test/greeter_test.rb` with `MissingTypeAnnotation`, so `test_an_unannotated_public_method_in_a_nested_test_or_spec_passes_lint` fails before the fix and passes after it.
+- Security: configuration, tests and docs only; no new dependency.
+- Compliance: the new test matches the Proof name in the plan's Coordinator decisions. README and CHANGELOG say nested folders stay unchecked. No disable comments, no skipped tests.
+- Design: the exclusion lives in `default.yml`, the layer that owns the inline RBS cops; the comment above `Style/RbsInline` names why the `**/` is there.
+
+Findings:
+
+None.
