@@ -55,6 +55,8 @@ The gem's maintainer and CI. Consumers see the new minimum Ruby, 4.0, on their n
 - Raise `required_ruby_version` to `>= 4.0` — Etienne chose it over keeping `>= 3.4`; no reason given.
 - Bump GitHub Actions in `ci.yml` — Etienne approved the workflow edit; no reason given.
 - Autonomous delivery without Codex review — Etienne chose it.
+- "`bundle outdated` lists nothing" is proved with `bundle outdated --strict` — prism 2 is capped by rubocop-ast and minitest; Etienne chose --strict over blocking the change.
+- `ci.yml` stays unchanged — checkout@v7.0.1 is the latest release and setup-rv@main is newer than its only tag; Etienne accepted that.
 
 ## Open questions
 
