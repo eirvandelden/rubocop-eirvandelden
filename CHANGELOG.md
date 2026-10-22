@@ -5,6 +5,7 @@
 - Check inline RBS annotations (`rubocop-rbs_inline`). The checks run only in files that start with `# rbs_inline: enabled`, and no file is required to opt in.
 - `Layout/LeadingCommentSpace` accepts `#:` return annotations.
 - YARD cops are off by default. A project that documents with YARD adds `YARD: Enabled: true` to its `.rubocop.yml`.
+- Requires Ruby 4.0 or newer (was 3.4).
 
 ## 0.1.0
 
