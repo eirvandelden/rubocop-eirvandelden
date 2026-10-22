@@ -68,7 +68,7 @@ Not affected: no runtime path is added or changed.
 ## Files that change
 
 - `.ruby-version` — `4.0.5` to `4.0.7`.
-- `Gemfile.lock` — `rubocop-capybara` 3.0.0 to 3.1.0 (its `rubocop` requirement moves to `~> 1.89`), `uri` 1.1.1 to 1.1.2, their two checksums, `RUBY VERSION` to `ruby 4.0.7`, `BUNDLED WITH` to `4.0.23`. Checked during planning: a scratch run of the step 2 command produces exactly these seven hunks and nothing else.
+- `Gemfile.lock` — `rubocop-capybara` 3.0.0 to 3.1.0 (its `rubocop` requirement moves to `~> 1.89`), `uri` 1.1.1 to 1.1.2, their two checksums, `rubocop` 1.92.0 to 1.92.1 and its checksum (released after this plan, bumped in its own commit), `RUBY VERSION` to `ruby 4.0.7`, `BUNDLED WITH` to `4.0.23`. Checked during planning: a scratch run of the step 2 command produces exactly these seven hunks and nothing else.
 - `rubocop-eirvandelden.gemspec` — line 12, `required_ruby_version` from `">= 3.4"` to `">= 4.0"`.
 - `test/shared_configuration_test.rb` — lines 201–208: expected value `">= 4.0"`; the comment says the gem asks for the Ruby 4.0 its projects run, and that a consumer on an older Ruby must upgrade first.
 - `CHANGELOG.md` — under `## Unreleased`, add `- Requires Ruby 4.0 or newer (was 3.4).`
