@@ -11,6 +11,7 @@
 plugins:
   - rubocop-obsession
   - rubocop-rails
+  - rubocop-rbs_inline
 
 Obsession/Rails:
   Enabled: true
@@ -34,6 +35,11 @@ Obsession/Rails/MigrationBelongsTo:
   Exclude:
     - '**/db/migrate/**/*'
 Obsession/Rails/FullyDefinedJsonField:
+  Exclude:
+    - '**/db/migrate/**/*'
+
+# Migrations are generated, run once and never called from code, so a signature adds nothing.
+Style/RbsInline/MissingTypeAnnotation:
   Exclude:
     - '**/db/migrate/**/*'
 

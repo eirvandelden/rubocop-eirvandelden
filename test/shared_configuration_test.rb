@@ -19,8 +19,99 @@ class SharedConfigurationTest < Minitest::Test
     Layout/LineLength Metrics/BlockLength Style/FrozenStringLiteralComment
   ].freeze
 
-  MALFORMED_OPTED_IN = <<~RUBY.freeze
-    # rbs_inline: enabled
+  MALFORMED_WITHOUT_MAGIC_COMMENT = <<~RUBY.freeze
+    # @rbs name: Array[String
+    def greet(name)
+      name
+    end
+  RUBY
+
+  def test_a_malformed_inline_rbs_annotation_fails_lint_without_a_magic_comment
+    output, status = lint(MALFORMED_WITHOUT_MAGIC_COMMENT)
+
+    refute_predicate status, :success?
+    assert_includes output, "Style/RbsInline/InvalidTypes"
+  end
+
+  def test_a_public_method_without_a_signature_fails_lint
+    output, status = lint("def greet(name)\n  name\nend\n")
+
+    refute_predicate status, :success?
+    assert_includes output, "Style/RbsInline/MissingTypeAnnotation"
+  end
+
+  def test_a_public_method_with_a_signature_above_it_passes_lint
+    output, status = lint("#: (String) -> String\ndef greet(name)\n  name\nend\n")
+
+    assert_predicate status, :success?, output
+  end
+
+  PRIVATE_METHOD = <<~RUBY.freeze
+    class Greeter
+      private
+        def greet(name)
+          name
+        end
+    end
+  RUBY
+
+  def test_a_private_method_without_a_signature_passes_lint
+    output, status = lint(PRIVATE_METHOD)
+
+    assert_predicate status, :success?, output
+  end
+
+  def test_a_public_attribute_without_a_type_fails_lint
+    output, status = lint("class Greeter\n  attr_reader :name\nend\n")
+
+    refute_predicate status, :success?
+    assert_includes output, "Style/RbsInline/MissingTypeAnnotation"
+  end
+
+  def test_a_public_attribute_with_a_trailing_type_passes_lint
+    output, status = lint("class Greeter\n  attr_reader :name #: String\nend\n")
+
+    assert_predicate status, :success?, output
+  end
+
+  UNTYPED_DATA = "Point = Data.define(:x, :y)\n".freeze
+
+  TYPED_DATA = <<~RUBY.freeze
+    Point = Data.define(
+      :x,  #: Integer
+      :y   #: Integer
+    )
+  RUBY
+
+  def test_a_data_class_fails_lint_until_each_attribute_has_a_type
+    output, status = lint(UNTYPED_DATA)
+    typed_output, typed_status = lint(TYPED_DATA)
+
+    refute_predicate status, :success?
+    assert_includes output, "Style/RbsInline/MissingDataClassAnnotation"
+    assert_predicate typed_status, :success?, typed_output
+  end
+
+  UNTYPED_STRUCT = "Point = Struct.new(:x, :y)\n".freeze
+
+  TYPED_STRUCT = <<~RUBY.freeze
+    Point = Struct.new(
+      :x,  #: Integer
+      :y   #: Integer
+    )
+  RUBY
+
+  def test_a_struct_class_fails_lint_until_each_attribute_has_a_type
+    output, status = lint(UNTYPED_STRUCT)
+    typed_output, typed_status = lint(TYPED_STRUCT)
+
+    refute_predicate status, :success?
+    assert_includes output, "Style/RbsInline/MissingStructClassAnnotation"
+    assert_predicate typed_status, :success?, typed_output
+  end
+
+  OPTED_OUT = <<~RUBY.freeze
+    # rbs_inline: disabled
 
     # @rbs name: Array[String
     def greet(name)
@@ -28,53 +119,137 @@ class SharedConfigurationTest < Minitest::Test
     end
   RUBY
 
-  def test_a_malformed_inline_rbs_annotation_fails_lint_in_a_file_that_opts_in
-    output, status = lint(MALFORMED_OPTED_IN)
+  def test_a_file_that_opts_out_passes_lint_however_it_is_annotated
+    output, status = lint(OPTED_OUT)
 
-    refute_predicate status, :success?
-    assert_includes output, "Style/RbsInline/"
+    assert_predicate status, :success?, output
   end
 
-  VALID_OPTED_IN = <<~RUBY.freeze
+  LEFTOVER_MAGIC_COMMENT = <<~RUBY.freeze
     # rbs_inline: enabled
 
-    # @rbs name: String
-    def greet(name) #: String
+    #: (String) -> String
+    def greet(name)
       name
     end
   RUBY
 
-  NOT_OPTED_IN = <<~RUBY.freeze
-    # @rbs name: Array[String
-    def greet(name) #: String
-      name
+  def test_a_leftover_rbs_inline_magic_comment_fails_lint
+    output, status = lint(LEFTOVER_MAGIC_COMMENT)
+
+    refute_predicate status, :success?
+    assert_includes output, "Remove # rbs_inline: magic comment."
+  end
+
+  def test_autocorrect_removes_a_leftover_rbs_inline_magic_comment
+    corrected = autocorrect(LEFTOVER_MAGIC_COMMENT)
+
+    refute_includes corrected, "# rbs_inline:"
+    assert_includes corrected, "#: (String) -> String\ndef greet(name)"
+  end
+
+  def test_a_method_marked_rbs_skip_passes_lint_without_a_signature
+    output, status = lint("# @rbs skip\ndef greet(name)\n  name\nend\n")
+
+    assert_predicate status, :success?, output
+  end
+
+  def test_an_unannotated_public_method_in_a_test_or_spec_passes_lint
+    [ "test/greeter_test.rb", "spec/greeter_spec.rb" ].each do |path|
+      output, status = lint("def greet(name)\n  name\nend\n", path: path)
+
+      assert_predicate status, :success?, "#{path}: #{output}"
+    end
+  end
+
+  def test_an_unannotated_public_method_in_a_nested_test_or_spec_passes_lint
+    [ "engines/shop/test/greeter_test.rb", "engines/shop/spec/greeter_spec.rb" ].each do |path|
+      output, status = lint("def greet(name)\n  name\nend\n", path: path)
+
+      assert_predicate status, :success?, "#{path}: #{output}"
+    end
+  end
+
+  MIGRATION = <<~RUBY.freeze
+    class CreateGreetings < ActiveRecord::Migration[8.0]
+      def change
+        create_table :greetings
+      end
     end
   RUBY
+
+  def test_a_rails_project_does_not_demand_a_signature_on_a_migration
+    output, status = lint(MIGRATION, "test/fixtures/rails_project.yml",
+                          path: "db/migrate/20260101000000_create_greetings.rb")
+
+    assert_predicate status, :success?, output
+  end
+
+  def test_the_shared_rules_demand_a_signature_on_a_migration_outside_rails
+    output, status = lint(MIGRATION, path: "db/migrate/20260101000000_create_greetings.rb")
+
+    refute_predicate status, :success?
+    assert_includes output, "Style/RbsInline/MissingTypeAnnotation"
+  end
+
+  CONTROLLER = <<~RUBY.freeze
+    class GreetingsController < ApplicationController
+      def index
+        head :ok
+      end
+    end
+  RUBY
+
+  def test_a_rails_project_demands_a_signature_on_a_controller_action
+    output, status = lint(CONTROLLER, "test/fixtures/rails_project.yml",
+                          path: "app/controllers/greetings_controller.rb")
+
+    refute_predicate status, :success?
+    assert_includes output, "Style/RbsInline/MissingTypeAnnotation"
+  end
+
+  def test_a_rails_project_does_not_demand_a_signature_in_a_test
+    output, status = lint("def greet(name)\n  name\nend\n", "test/fixtures/rails_project.yml",
+                          path: "test/greeter_test.rb")
+
+    assert_predicate status, :success?, output
+  end
+
+  def test_autocorrect_keeps_a_colon_signature_and_drops_rbs_lines_beside_it
+    signed = "#: (String) -> String\ndef greet(name)\n  name\nend\n"
+    corrected = autocorrect("# @rbs name: String\n# @rbs return: String\n#{signed}")
+
+    assert_equal signed, corrected
+  end
+
+  def test_the_gem_reports_version_one
+    specification = Gem::Specification.load("rubocop-eirvandelden.gemspec")
+
+    assert_equal Gem::Version.new("1.0.0"), specification.version
+  end
+
+  def test_the_gem_asks_for_an_rbs_inline_plugin_that_knows_every_named_cop
+    specification = Gem::Specification.load("rubocop-eirvandelden.gemspec")
+    plugin = specification.dependencies.find { |dependency| dependency.name == "rubocop-rbs_inline" }
+
+    assert_equal Gem::Requirement.new("~> 2.0"), plugin.requirement
+  end
 
   WRONG_YARD_TAG_TYPE = <<~RUBY.freeze
     # @param name [Array<String]
+    #: (Array[String]) -> Array[String]
     def greet(name)
       name
     end
   RUBY
 
-  VALIDATING_RBS_RULES = %w[
-    EmbeddedRbsSpacing InvalidComment InvalidTypes KeywordSeparator MethodCommentSpacing
-    ParametersSeparator RedundantAnnotationWithSkip RedundantTypeAnnotation UnmatchedAnnotations
-    VariableCommentSpacing
+  INLINE_RBS_RULES = %w[
+    DataClassCommentAlignment DataDefineWithBlock EmbeddedRbsSpacing InvalidComment InvalidTypes
+    KeywordSeparator MethodCommentSpacing MissingDataClassAnnotation MissingStructClassAnnotation
+    MissingTypeAnnotation ParametersSeparator RedundantAnnotationWithSkip
+    RedundantInstanceVariableAnnotation RedundantTypeAnnotation RequireRbsInlineComment
+    StructClassCommentAlignment StructNewWithBlock UnmatchedAnnotations VariableCommentSpacing
   ].map { |rule| "Style/RbsInline/#{rule}" }.freeze
-
-  def test_a_valid_inline_rbs_annotation_passes_lint_in_a_file_that_opts_in
-    output, status = lint(VALID_OPTED_IN)
-
-    assert_predicate status, :success?, output
-  end
-
-  def test_a_file_that_does_not_opt_in_passes_lint_however_it_is_annotated
-    output, status = lint(NOT_OPTED_IN)
-
-    assert_predicate status, :success?, output
-  end
 
   def test_a_yard_comment_with_a_wrong_tag_type_passes_lint_under_the_shared_rules
     output, status = lint(WRONG_YARD_TAG_TYPE)
@@ -90,17 +265,10 @@ class SharedConfigurationTest < Minitest::Test
   end
 
   def test_the_shared_rules_switch_on_every_inline_rbs_rule
-    settings = settings_for(VALIDATING_RBS_RULES)
-    switched_off = VALIDATING_RBS_RULES.reject { |rule| settings.fetch(rule).fetch("Enabled") == true }
+    settings = settings_for(INLINE_RBS_RULES)
+    switched_off = INLINE_RBS_RULES.reject { |rule| settings.fetch(rule).fetch("Enabled") == true }
 
     assert_empty switched_off
-  end
-
-  def test_the_shared_rules_never_demand_the_rbs_inline_magic_comment
-    setting = settings_for([ "Style/RbsInline/RequireRbsInlineComment" ])
-      .fetch("Style/RbsInline/RequireRbsInlineComment")
-
-    assert_equal [ true, true ], [ setting.fetch("Enabled"), setting.fetch("AllowMissingComment") ]
   end
 
   def test_the_shared_rules_accept_inline_rbs_annotations_without_a_space
@@ -225,11 +393,20 @@ class SharedConfigurationTest < Minitest::Test
   end
 
   private
-    def lint(source, configuration = "config/default.yml")
-      output, status = Open3.capture2e("bundle", "exec", "rubocop", "--stdin", "lib/example.rb",
+    def lint(source, configuration = "config/default.yml", path: "lib/example.rb")
+      output, status = Open3.capture2e("bundle", "exec", "rubocop", "--stdin", path,
                                        "-c", configuration, "--format", "simple", stdin_data: source)
 
       [ output.force_encoding(Encoding::UTF_8), status ]
+    end
+
+    # `--autocorrect-all` because RedundantTypeAnnotation is not a safe autocorrect. `--stderr`
+    # keeps the report off stdout, which then holds only the corrected source.
+    def autocorrect(source, configuration = "config/default.yml", path: "lib/example.rb")
+      corrected, = Open3.capture3("bundle", "exec", "rubocop", "--stdin", path, "-c", configuration,
+                                  "--autocorrect-all", "--stderr", "--format", "quiet", stdin_data: source)
+
+      corrected.force_encoding(Encoding::UTF_8)
     end
 
     def settings_for(rules, configuration = "config/default.yml")

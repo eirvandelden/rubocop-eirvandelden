@@ -94,11 +94,20 @@ Rails:
 Obsession/Rails:
   Enabled: false
 
-# Inline RBS annotations are checked only in files that carry `# rbs_inline: enabled`. Naming
-# the mode keeps a plugin release from switching every file on. Omakase switches the whole Style
-# department off, so each checking cop is named. None of them demands an annotation.
+# Every file is checked for inline RBS annotations, with no magic comment. A file skips the checks
+# only with `# rbs_inline: disabled`. A leftover `# rbs_inline: enabled` is flagged, and autocorrect
+# removes it. Omakase switches the whole Style department off, so each cop is named. Lint demands
+# a `#:` signature on public methods and `attr_*`, and a `#:` type on every Data and Struct attribute.
+# The plugin skips only the root `test/` and `spec/`; the leading `**/` also skips nested ones.
 Style/RbsInline:
-  Mode: opt_in
+  Mode: opt_out
+  Exclude:
+    - '**/spec/**/*'
+    - '**/test/**/*'
+Style/RbsInline/DataClassCommentAlignment:
+  Enabled: true
+Style/RbsInline/DataDefineWithBlock:
+  Enabled: true
 Style/RbsInline/EmbeddedRbsSpacing:
   Enabled: true
 Style/RbsInline/InvalidComment:
@@ -109,15 +118,29 @@ Style/RbsInline/KeywordSeparator:
   Enabled: true
 Style/RbsInline/MethodCommentSpacing:
   Enabled: true
+Style/RbsInline/MissingDataClassAnnotation:
+  Enabled: true
+Style/RbsInline/MissingStructClassAnnotation:
+  Enabled: true
+Style/RbsInline/MissingTypeAnnotation:
+  Enabled: true
+  EnforcedStyle: method_type_signature
+  Visibility: public
 Style/RbsInline/ParametersSeparator:
   Enabled: true
-# Opt-in mode never reports this cop. Naming it records that a file is not required to opt in.
-Style/RbsInline/RequireRbsInlineComment:
-  Enabled: true
-  AllowMissingComment: true
 Style/RbsInline/RedundantAnnotationWithSkip:
   Enabled: true
+Style/RbsInline/RedundantInstanceVariableAnnotation:
+  Enabled: true
+# Keeps `#:` and removes the `# @rbs` lines beside it; the default style would delete the `#:`.
 Style/RbsInline/RedundantTypeAnnotation:
+  Enabled: true
+  EnforcedStyle: method_type_signature
+Style/RbsInline/RequireRbsInlineComment:
+  Enabled: true
+Style/RbsInline/StructClassCommentAlignment:
+  Enabled: true
+Style/RbsInline/StructNewWithBlock:
   Enabled: true
 Style/RbsInline/UnmatchedAnnotations:
   Enabled: true
