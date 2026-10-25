@@ -6,6 +6,7 @@
 - `# rbs_inline: disabled` is the only way out of the checks. A leftover `# rbs_inline: enabled` is flagged, and autocorrect removes it. Migrations are exempt in Rails projects (`config/rails.yml`), and every `test/` or `spec/` folder, nested ones included, stays unchecked.
 - `Layout/LeadingCommentSpace` accepts `#:` return annotations.
 - YARD cops are off by default. A project that documents with YARD adds `YARD: Enabled: true` to its `.rubocop.yml`.
+- Requires Ruby 4.0 or newer (was 3.4).
 
 ## 0.1.0
 
