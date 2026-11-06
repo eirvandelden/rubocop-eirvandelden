@@ -2,7 +2,7 @@ PATH
   remote: .
   specs:
     rubocop-eirvandelden (1.0.0)
-      rubocop
+      rubocop (~> 1.92)
       rubocop-minitest
       rubocop-obsession
       rubocop-packaging
