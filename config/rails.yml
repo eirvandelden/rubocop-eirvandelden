@@ -38,10 +38,12 @@ Obsession/Rails/FullyDefinedJsonField:
   Exclude:
     - '**/db/migrate/**/*'
 
-# Migrations are generated, run once and never called from code, so a signature adds nothing.
+# Run-once scripts (migrations and data migrations) are never called from code, so a signature adds nothing.
 Style/RbsInline/MissingTypeAnnotation:
   Exclude:
     - '**/db/migrate/**/*'
+    - '**/db/*_migrate/**/*'
+    - '**/db/data/**/*'
 
 # "validate :account_must_be_external" reads as a sentence. The prefix this wants would make it
 # "validate :validate_account_must_be_external", which stutters and says no more.

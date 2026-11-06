@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Rails projects no longer need a `#:` signature in `db/data`, `db/cable_migrate` or `db/queue_migrate`, the same as `db/migrate`: they are run-once scripts.
+
 ## 1.0.0
 
 - **Breaking:** every non-test file is now checked for inline RBS annotations (`rubocop-rbs_inline`, `Mode: opt_out`), with no magic comment. Public methods and `attr_*` need a `#:` signature, and `Data.define` and `Struct.new` attributes need a `#:` type. Projects fail lint until they annotate.

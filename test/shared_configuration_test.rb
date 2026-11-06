@@ -185,6 +185,29 @@ class SharedConfigurationTest < Minitest::Test
     assert_predicate status, :success?, output
   end
 
+  def test_a_rails_project_does_not_demand_a_signature_on_a_data_migration
+    output, status = lint(MIGRATION, "test/fixtures/rails_project.yml",
+                          path: "db/data/20260101000000_backfill_greetings.rb")
+
+    assert_predicate status, :success?, output
+  end
+
+  def test_a_rails_project_does_not_demand_a_signature_on_a_cable_or_queue_migration
+    %w[db/cable_migrate db/queue_migrate].each do |directory|
+      output, status = lint(MIGRATION, "test/fixtures/rails_project.yml",
+                            path: "#{directory}/20260101000000_create_greetings.rb")
+
+      assert_predicate status, :success?, output
+    end
+  end
+
+  def test_a_rails_project_still_demands_a_signature_in_app
+    output, status = lint(MIGRATION, "test/fixtures/rails_project.yml", path: "app/models/greeting.rb")
+
+    refute_predicate status, :success?
+    assert_includes output, "Style/RbsInline/MissingTypeAnnotation"
+  end
+
   def test_the_shared_rules_demand_a_signature_on_a_migration_outside_rails
     output, status = lint(MIGRATION, path: "db/migrate/20260101000000_create_greetings.rb")
 
