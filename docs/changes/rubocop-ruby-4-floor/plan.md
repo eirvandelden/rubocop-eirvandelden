@@ -24,7 +24,7 @@ Not affected: there is no runtime path and no query. The new test loads the gems
 
 ### Invariants
 
-- The `rubocop` requirement in `rubocop-eirvandelden.gemspec` accepts 1.92.0, 1.92.1 and any later 1.x. It refuses 1.74, 1.91 and 2.0. The gemspec enforces it; `test_the_gem_accepts_only_a_rubocop_its_ci_tests` proves it.
+- The `rubocop` requirement in `rubocop-eirvandelden.gemspec` accepts 1.92.0, 1.92.1 and any later 1.x. It refuses 1.74, 1.91 and 2.0. The gemspec enforces it; `test_the_gem_accepts_rubocop_1_92_or_a_later_1_x` proves it.
 - The PATH section of `Gemfile.lock` carries the same requirement as the gemspec. Bundler enforces it in frozen mode: `BUNDLE_FROZEN=true bundle exec rake test` fails when the two differ.
 
 ### Alternatives
@@ -50,7 +50,7 @@ A real Bundler resolve in the test was also rejected: it needs the network or a 
 
 ## Files that change
 
-- `test/shared_configuration_test.rb` — add `test_the_gem_accepts_only_a_rubocop_its_ci_tests` after `test_the_gem_asks_for_an_rbs_inline_plugin_that_knows_every_named_cop` (around line 236).
+- `test/shared_configuration_test.rb` — add `test_the_gem_accepts_rubocop_1_92_or_a_later_1_x` after `test_the_gem_asks_for_an_rbs_inline_plugin_that_knows_every_named_cop` (around line 236).
 - `rubocop-eirvandelden.gemspec` — line 16 becomes `spec.add_dependency "rubocop", "~> 1.92"`.
 - `Gemfile.lock` — PATH section line 5 becomes `rubocop (~> 1.92)`. Regenerate with `bi`; never edit by hand.
 - `CHANGELOG.md` — one line in `## 1.0.0`, after "Requires Ruby 4.0 or newer (was 3.4).": `- Requires RuboCop 1.92 or a later 1.x (was any version). RuboCop 1.82 is the first release that knows Ruby 4.0, and 1.92 is the release this gem's CI tests.`
@@ -58,9 +58,9 @@ A real Bundler resolve in the test was also rejected: it needs the network or a 
 The test to add:
 
 ```ruby
-  # RuboCop 1.82 is the first release that knows Ruby 4.0. The gem asks for 1.92, the release
-  # its CI tests, so a fresh resolve never falls back to a RuboCop that rejects TargetRubyVersion 4.0.
-  def test_the_gem_accepts_only_a_rubocop_its_ci_tests
+  # RuboCop 1.82 is the first release that knows Ruby 4.0. The gem's floor is 1.92, so a fresh
+  # resolve never falls back to a RuboCop that rejects TargetRubyVersion 4.0.
+  def test_the_gem_accepts_rubocop_1_92_or_a_later_1_x
     specification = Gem::Specification.load("rubocop-eirvandelden.gemspec")
     rubocop = specification.dependencies.find { |dependency| dependency.name == "rubocop" }
     accepted = %w[1.74 1.91 1.92.0 1.92.1 1.99 2.0].select do |version|
@@ -73,7 +73,7 @@ The test to add:
 
 ## Order of work
 
-1. Add the test above. Run `bundle exec ruby -Itest test/shared_configuration_test.rb -n test_the_gem_accepts_only_a_rubocop_its_ci_tests`. Watch it fail: the unconstrained requirement accepts all six versions, so `accepted` also holds `1.74`, `1.91` and `2.0`.
+1. Add the test above. Run `bundle exec ruby -Itest test/shared_configuration_test.rb -n test_the_gem_accepts_rubocop_1_92_or_a_later_1_x`. Watch it fail: the unconstrained requirement accepts all six versions, so `accepted` also holds `1.74`, `1.91` and `2.0`.
 2. Commit the failing test on its own (bug fix: the regression test comes first).
 3. Change the gemspec's `rubocop` line to `"~> 1.92"`.
 4. Run `bi`. Confirm with `git diff Gemfile.lock` that only the PATH line `rubocop` → `rubocop (~> 1.92)` changes and the GEM section still holds `rubocop (1.92.1)`.
@@ -93,13 +93,13 @@ The test to add:
 
 ## Proof
 
-- A project cannot resolve this gem next to RuboCop 1.74, nor next to 1.91 → `test/shared_configuration_test.rb` `test_the_gem_accepts_only_a_rubocop_its_ci_tests` (1.74 and 1.91 are absent from the accepted set).
-- RuboCop 1.92.0, the locked 1.92.1 and any later 1.x satisfy the gemspec; RuboCop 2.0 does not → `test/shared_configuration_test.rb` `test_the_gem_accepts_only_a_rubocop_its_ci_tests` (1.92.0, 1.92.1 and 1.99 are in the set; 2.0 is not).
+- A project cannot resolve this gem next to RuboCop 1.74, nor next to 1.91 → `test/shared_configuration_test.rb` `test_the_gem_accepts_rubocop_1_92_or_a_later_1_x` (1.74 and 1.91 are absent from the accepted set).
+- RuboCop 1.92.0, the locked 1.92.1 and any later 1.x satisfy the gemspec; RuboCop 2.0 does not → `test/shared_configuration_test.rb` `test_the_gem_accepts_rubocop_1_92_or_a_later_1_x` (1.92.0, 1.92.1 and 1.99 are in the set; 2.0 is not).
 - The changelog tells consumers that the gem now needs RuboCop 1.92 or newer → check: `grep -n "RuboCop 1.92 or a later 1.x" CHANGELOG.md` prints one line inside the `## 1.0.0` section. The wording names the 1.x ceiling, because `~> 1.92` refuses RuboCop 2.0.
 - Invariant: the `Gemfile.lock` PATH section matches the gemspec, enforced by Bundler in frozen mode → check: `BUNDLE_FROZEN=true bundle exec rake test` runs without a lockfile error, and `git diff main -- Gemfile.lock` shows only `rubocop (~> 1.92)` under PATH.
 
 Per changed file, the unit tests expected, named as behaviour:
-- `rubocop-eirvandelden.gemspec`: `the gem accepts only a RuboCop its CI tests`.
+- `rubocop-eirvandelden.gemspec`: `the gem accepts RuboCop 1.92 or a later 1.x`.
 - `Gemfile.lock`, `CHANGELOG.md`: none (configuration and documentation; checked above).
 
 Test setup: none. The test loads the real gemspec from the repository root, as the existing gemspec tests do. No fixtures, no network, no faked boundaries.
