@@ -258,6 +258,18 @@ class SharedConfigurationTest < Minitest::Test
     assert_equal Gem::Requirement.new("~> 2.0"), plugin.requirement
   end
 
+  # RuboCop 1.82 is the first release that knows Ruby 4.0. The gem asks for 1.92, the release
+  # its CI tests, so a fresh resolve never falls back to a RuboCop that rejects TargetRubyVersion 4.0.
+  def test_the_gem_accepts_only_a_rubocop_its_ci_tests
+    specification = Gem::Specification.load("rubocop-eirvandelden.gemspec")
+    rubocop = specification.dependencies.find { |dependency| dependency.name == "rubocop" }
+    accepted = %w[1.74 1.91 1.92.0 1.92.1 1.99 2.0].select do |version|
+      rubocop.requirement.satisfied_by?(Gem::Version.new(version))
+    end
+
+    assert_equal %w[1.92.0 1.92.1 1.99], accepted
+  end
+
   WRONG_YARD_TAG_TYPE = <<~RUBY.freeze
     # @param name [Array<String]
     #: (Array[String]) -> Array[String]

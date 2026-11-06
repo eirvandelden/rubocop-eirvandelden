@@ -113,3 +113,5 @@ Domain skills applied: dependencies (constraint style, approval already recorded
 
 - The changelog line says "RuboCop 1.92 or newer", but `~> 1.92` refuses RuboCop 2.0, which the test also requires → fixed (changelog line and its Proof check now say "RuboCop 1.92 or a later 1.x")
 - The plan claims a frozen CI install enforces lockfile parity, but `.github/workflows/ci.yml` only sets `install-gems: true` and never configures frozen mode → fixed (CI claim removed; Invariants, Integration points, Order of work step 8 and Proof now use `BUNDLE_FROZEN=true bundle exec rake test`)
+
+Reproduction: committed
