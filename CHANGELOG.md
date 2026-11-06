@@ -11,6 +11,7 @@
 - `Layout/LeadingCommentSpace` accepts `#:` return annotations.
 - YARD cops are off by default. A project that documents with YARD adds `YARD: Enabled: true` to its `.rubocop.yml`.
 - Requires Ruby 4.0 or newer (was 3.4).
+- Requires RuboCop 1.92 or a later 1.x (was any version). RuboCop 1.82 is the first release that knows Ruby 4.0, and 1.92 is the release this gem's CI tests.
 
 ## 0.1.0
 
