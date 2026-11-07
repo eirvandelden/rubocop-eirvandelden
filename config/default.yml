@@ -2,6 +2,12 @@
 inherit_gem:
   rubocop-rails-omakase: rubocop.yml
 
+# The two cops below wrap upstream InvalidTypes and KeywordSeparator so that
+# `# @rbs module-self: X` passes. Steep's inline parser requires the colon.
+require:
+  - ../lib/rubocop/cop/style/rbs_inline/invalid_types_allowing_colon.rb
+  - ../lib/rubocop/cop/style/rbs_inline/keyword_separator_allowing_colon.rb
+
 plugins:
   - rubocop-minitest
   - rubocop-obsession
@@ -113,8 +119,12 @@ Style/RbsInline/EmbeddedRbsSpacing:
 Style/RbsInline/InvalidComment:
   Enabled: true
 Style/RbsInline/InvalidTypes:
+  Enabled: false
+Style/RbsInline/InvalidTypesAllowingColon:
   Enabled: true
 Style/RbsInline/KeywordSeparator:
+  Enabled: false
+Style/RbsInline/KeywordSeparatorAllowingColon:
   Enabled: true
 Style/RbsInline/MethodCommentSpacing:
   Enabled: true
