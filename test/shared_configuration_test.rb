@@ -192,8 +192,8 @@ class SharedConfigurationTest < Minitest::Test
     assert_predicate status, :success?, output
   end
 
-  def test_a_rails_project_does_not_demand_a_signature_on_a_cable_or_queue_migration
-    %w[db/cable_migrate db/queue_migrate].each do |directory|
+  def test_a_rails_project_does_not_demand_a_signature_on_a_solid_migration
+    %w[db/cable_migrate db/queue_migrate db/cache_migrate].each do |directory|
       output, status = lint(MIGRATION, "test/fixtures/rails_project.yml",
                             path: "#{directory}/20260101000000_create_greetings.rb")
 
@@ -245,6 +245,64 @@ class SharedConfigurationTest < Minitest::Test
     assert_equal signed, corrected
   end
 
+  MODULE_SELF_WITH_COLON = "# @rbs module-self: Foo\nmodule Greeting\nend\n".freeze
+  MODULE_SELF_WITH_GENERIC = "# @rbs module-self: Foo[Bar]\nmodule Greeting\nend\n".freeze
+  MODULE_SELF_WITHOUT_COLON = "# @rbs module-self Foo\nmodule Greeting\nend\n".freeze
+  MODULE_SELF_WITH_DESCRIPTION = "# @rbs module-self: Foo -- depending on its methods\nmodule Greeting\nend\n".freeze
+  MODULE_SELF_BROKEN = "# @rbs module-self: Foo[\nmodule Greeting\nend\n".freeze
+  BROKEN_SIGNATURE = "#: (Integer -> void\ndef greet(count)\n  count\nend\n".freeze
+  COLON_AFTER_SKIP = "#: (String) -> String\n# @rbs skip:\ndef greet(name)\n  name\nend\n".freeze
+
+  def test_a_module_self_annotation_with_a_colon_passes_lint
+    output, status = lint(MODULE_SELF_WITH_COLON)
+    generic_output, generic_status = lint(MODULE_SELF_WITH_GENERIC)
+
+    assert_predicate status, :success?, output
+    assert_predicate generic_status, :success?, generic_output
+  end
+
+  def test_a_module_self_annotation_with_a_colon_and_a_description_passes_lint
+    output, status = lint(MODULE_SELF_WITH_DESCRIPTION)
+
+    assert_predicate status, :success?, output
+  end
+
+  def test_a_module_self_annotation_without_a_colon_passes_lint
+    output, status = lint(MODULE_SELF_WITHOUT_COLON)
+
+    assert_predicate status, :success?, output
+  end
+
+  def test_a_module_self_annotation_with_a_colon_and_a_broken_type_fails_lint
+    output, status = lint(MODULE_SELF_BROKEN)
+
+    refute_predicate status, :success?
+    assert_includes output, "Style/RbsInline/InvalidTypesAllowingColon"
+    assert_includes output, "Style/RbsInline/KeywordSeparatorAllowingColon"
+  end
+
+  def test_a_broken_signature_fails_lint_as_an_invalid_type
+    output, status = lint(BROKEN_SIGNATURE)
+
+    refute_predicate status, :success?
+    assert_includes output, "Style/RbsInline/InvalidTypesAllowingColon"
+  end
+
+  def test_a_colon_after_skip_still_fails_lint
+    output, status = lint(COLON_AFTER_SKIP)
+
+    refute_predicate status, :success?
+    assert_includes output, "Style/RbsInline/KeywordSeparatorAllowingColon"
+  end
+
+  def test_the_gem_ships_the_cops_it_requires
+    specification = Gem::Specification.load("rubocop-eirvandelden.gemspec")
+    required = YAML.load_file("config/default.yml").fetch("require")
+    shipped = required.map { |path| File.expand_path(path, "config").delete_prefix("#{Dir.pwd}/") }
+
+    assert_empty shipped - specification.files
+  end
+
   def test_the_gem_reports_version_one
     specification = Gem::Specification.load("rubocop-eirvandelden.gemspec")
 
@@ -267,8 +325,8 @@ class SharedConfigurationTest < Minitest::Test
   RUBY
 
   INLINE_RBS_RULES = %w[
-    DataClassCommentAlignment DataDefineWithBlock EmbeddedRbsSpacing InvalidComment InvalidTypes
-    KeywordSeparator MethodCommentSpacing MissingDataClassAnnotation MissingStructClassAnnotation
+    DataClassCommentAlignment DataDefineWithBlock EmbeddedRbsSpacing InvalidComment InvalidTypesAllowingColon
+    KeywordSeparatorAllowingColon MethodCommentSpacing MissingDataClassAnnotation MissingStructClassAnnotation
     MissingTypeAnnotation ParametersSeparator RedundantAnnotationWithSkip
     RedundantInstanceVariableAnnotation RedundantTypeAnnotation RequireRbsInlineComment
     StructClassCommentAlignment StructNewWithBlock UnmatchedAnnotations VariableCommentSpacing
@@ -372,7 +430,9 @@ class SharedConfigurationTest < Minitest::Test
 
   # Rules whose advice we disagree with. Listing them means switching one back on has to be a
   # deliberate edit rather than a side effect of a plugin update.
-  RULES_WE_TURN_OFF = %w[Obsession/Rails/ValidationMethodName].freeze
+  RULES_WE_TURN_OFF = %w[
+    Obsession/Rails/ValidationMethodName Style/RbsInline/InvalidTypes Style/RbsInline/KeywordSeparator
+  ].freeze
 
   def test_the_shared_rules_switch_off_the_rules_we_disagree_with
     settings = settings_for(RULES_WE_TURN_OFF)

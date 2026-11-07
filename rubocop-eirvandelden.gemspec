@@ -11,7 +11,7 @@ Gem::Specification.new do |spec|
 
   spec.required_ruby_version = ">= 4.0"
 
-  spec.files = Dir["config/**/*.yml", "LICENSE.md", "README.md", "CHANGELOG.md"]
+  spec.files = Dir["config/**/*.yml", "lib/**/*.rb", "LICENSE.md", "README.md", "CHANGELOG.md"]
 
   spec.add_dependency "rubocop"
   spec.add_dependency "rubocop-rails-omakase"
