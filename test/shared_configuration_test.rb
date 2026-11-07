@@ -248,6 +248,7 @@ class SharedConfigurationTest < Minitest::Test
   MODULE_SELF_WITH_COLON = "# @rbs module-self: Foo\nmodule Greeting\nend\n".freeze
   MODULE_SELF_WITH_GENERIC = "# @rbs module-self: Foo[Bar]\nmodule Greeting\nend\n".freeze
   MODULE_SELF_WITHOUT_COLON = "# @rbs module-self Foo\nmodule Greeting\nend\n".freeze
+  MODULE_SELF_WITH_DESCRIPTION = "# @rbs module-self: Foo -- depending on its methods\nmodule Greeting\nend\n".freeze
   MODULE_SELF_BROKEN = "# @rbs module-self: Foo[\nmodule Greeting\nend\n".freeze
   BROKEN_SIGNATURE = "#: (Integer -> void\ndef greet(count)\n  count\nend\n".freeze
   COLON_AFTER_SKIP = "#: (String) -> String\n# @rbs skip:\ndef greet(name)\n  name\nend\n".freeze
@@ -258,6 +259,12 @@ class SharedConfigurationTest < Minitest::Test
 
     assert_predicate status, :success?, output
     assert_predicate generic_status, :success?, generic_output
+  end
+
+  def test_a_module_self_annotation_with_a_colon_and_a_description_passes_lint
+    output, status = lint(MODULE_SELF_WITH_DESCRIPTION)
+
+    assert_predicate status, :success?, output
   end
 
   def test_a_module_self_annotation_without_a_colon_passes_lint

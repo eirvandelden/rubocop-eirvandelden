@@ -7,7 +7,7 @@ module RuboCop
         # Recognises `# @rbs module-self: Type`, the form RBS 4's inline parser (and so Steep)
         # requires, where rbs-inline 0.14 reads `# @rbs module-self Type`.
         module ModuleSelfColonForm
-          COLON_FORM = /\A#\s*@rbs\s+module-self:\s*(?<type>.+)\z/ #: Regexp
+          COLON_FORM = /\A#\s*@rbs\s+module-self:\s*(?<type>.+?)(?:\s+--.*)?\z/ #: Regexp
 
           private
             # @rbs text: String
