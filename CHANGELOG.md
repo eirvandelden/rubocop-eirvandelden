@@ -3,6 +3,7 @@
 ## Unreleased
 
 - Rails projects no longer need a `#:` signature in `db/data`, `db/cable_migrate` or `db/queue_migrate`, the same as `db/migrate`: they are run-once scripts.
+- A valid `# @rbs module-self: X` passes lint, as Steep's inline mode requires. `Style/RbsInline/InvalidTypes` and `KeywordSeparator` are replaced by `InvalidTypesAllowingColon` and `KeywordSeparatorAllowingColon`, which flag everything else as before. The gem now ships Ruby under `lib/`.
 
 ## 1.0.0
 
