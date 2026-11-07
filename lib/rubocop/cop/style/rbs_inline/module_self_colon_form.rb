@@ -12,7 +12,7 @@ module RuboCop
           private
             # @rbs text: String
             def module_self_colon_form?(text) #: bool
-              type = COLON_FORM.match(text.strip)&.[](:type) or return false
+              type = text.strip[COLON_FORM, :type] or return false
 
               !RBS::Parser.parse_type(type, require_eof: true).nil?
             rescue RBS::ParsingError
